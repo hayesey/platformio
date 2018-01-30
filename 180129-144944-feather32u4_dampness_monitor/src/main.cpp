@@ -8,7 +8,7 @@
 #include <Adafruit_BMP085.h>
 #include <Arduino.h>
 
-int sleepcycles = 7;  // every sleepcycle will last 8 secs, total sleeptime will be sleepcycles * 8 sec
+int sleepcycles = 75;  // every sleepcycle will last 8 secs, total sleeptime will be sleepcycles * 8 sec
 bool joined = false;
 bool sleeping = false;
 #define LedPin 13     // pin 13 LED is not used, because it is connected to the SPI port
