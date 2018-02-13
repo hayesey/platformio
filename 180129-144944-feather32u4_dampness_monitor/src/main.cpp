@@ -15,7 +15,7 @@ uint8_t data[4];
 #define LedPin 13     // pin 13 LED is not used, because it is connected to the SPI port
 #define VBATPIN A9
 #define HihAddr 0x27
-#define DEVID 4
+#define DEVID 3
 //#define DEVID 2
 //#define DEVID 3
 //#define DEVID 4
@@ -314,11 +314,11 @@ void loop() {
         os_runloop_once();
       }
       sleeping = false;
-      delay(120000);
-      //for (int i=0;i<sleepcycles;i++)
-      //{
-      //    LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);    //sleep 8 seconds
-      //}
+      //delay(120000);
+      for (int i=0;i<sleepcycles;i++)
+      {
+          LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);    //sleep 8 seconds
+      }
     }
 
       digitalWrite(LedPin,((millis()/100) % 2) && (joined==false)); // only blinking when joining and not sleeping
