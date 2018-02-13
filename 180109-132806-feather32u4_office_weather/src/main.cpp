@@ -9,12 +9,14 @@
 #include <Adafruit_BMP085.h>
 // https://github.com/thesolarnomad/lora-serialization
 #include <LoraMessage.h>  // Use the encoder to format and transmit data.
-#include <Adafruit_SleepyDog.h>
+#include "LowPower.h"
 
 #define LEDPIN 13
 #if BSFRANCEBOARD
 #define VBATPIN A9
 #endif
+// 112  gives 15 mins
+int sleepcycles = 112;  // every sleepcycle will last 8 secs, total sleeptime will be sleepcycles * 8 sec
 
 /*************************************
  * TODO: Change the following keys
@@ -142,7 +144,7 @@ void onEvent (ev_t ev) {
     if (ev == EV_TXCOMPLETE) {
         Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
         // Schedule next transmission
-        os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL), do_send);
+        //os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL), do_send);
         digitalWrite(LEDPIN,LOW);
         //radio.sleep();
         //Watchdog.sleep(600);
@@ -212,5 +214,15 @@ void setup() {
 }
 
 void loop() {
-    os_runloop_once();
+    do_send(&sendjob);    // Sent sensor values
+    while(sleeping == false)
+    {
+      os_runloop_once();
+    }
+    sleeping = false;
+    delay(120000);
+    //for (int i=0;i<sleepcycles;i++)
+    //{
+    //    LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);    //sleep 8 seconds
+    //}
 }
