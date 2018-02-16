@@ -6,7 +6,6 @@
 #include "LowPower.h"
 #include <Wire.h>
 #include <Arduino.h>
-#include <TinyGPS.h>
 
 int sleepcycles = 75;  // every sleepcycle will last 8 secs, total sleeptime will be sleepcycles * 8 sec
 bool joined = false;
@@ -15,7 +14,7 @@ uint8_t data[4];
 #define LedPin 13     // pin 13 LED is not used, because it is connected to the SPI port
 #define VBATPIN A9
 #define HihAddr 0x27
-#define DEVID 3
+#define DEVID 1
 //#define DEVID 2
 //#define DEVID 3
 //#define DEVID 4
@@ -27,7 +26,7 @@ uint8_t data[4];
   static const u1_t DEVEUI[8]  = { 0x0A, 0x2A, 0x86, 0xCB, 0x8D, 0x0E, 0x46, 0x00 };
   static const u1_t APPKEY[16] = { 0xDA, 0xEF, 0xE2, 0x77, 0xEF, 0x58, 0x0F, 0x3F, 0x9D, 0x77, 0x24, 0xCC, 0xE1, 0xB4, 0x4F, 0x92 };
   // 01 is main unit with gps
-  static const uint8_t DEVTYPE = 0x01;
+  static const uint8_t DEVTYPE = 0x02;
 #elif DEVID==2
   // dampmon2
   static const u1_t DEVEUI[8]  = { 0x93, 0x0F, 0x45, 0x20, 0xBD, 0x9E, 0xBD, 0x00 };
@@ -233,45 +232,6 @@ void do_send(osjob_t* j) {
       message[4] = (uint8_t)lowByte(humidity);
       message[5] = (uint8_t)highByte(temperature);
       message[6] = (uint8_t)lowByte(temperature);
-      LMIC_setTxData2(1, message, sizeof(message), 0);
-    } else if (DEVTYPE == 0x01) {
-      TinyGPS gps;
-      bool newData = false;
-      float flat, flon;
-      for (unsigned long start = millis(); millis() - start < 1000;)
-      {
-        while (Serial1.available())
-        {
-          char c = Serial1.read();
-          if (gps.encode(c)) // Did a new valid sentence come in?
-            newData = true;
-        }
-      }
-      if (newData)
-      {
-        unsigned long age;
-        gps.f_get_position(&flat, &flon, &age);
-        flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6;
-        flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6;
-      }
-      uint32_t lat = flat * 1000000;
-      uint32_t lon = flon * 1000000;
-      uint8_t message[15];
-      message[0] = DEVTYPE;
-      message[1] = (uint8_t)highByte(vbatint);
-      message[2] = (uint8_t)lowByte(vbatint);
-      message[3] = (uint8_t)highByte(humidity);
-      message[4] = (uint8_t)lowByte(humidity);
-      message[5] = (uint8_t)highByte(temperature);
-      message[6] = (uint8_t)lowByte(temperature);
-      message[7] = lat >> 24;
-      message[8] = lat >> 16;
-      message[9] = lat >> 8;
-      message[10] = lat;
-      message[11] = lon >> 24;
-      message[12] = lon >> 16;
-      message[13] = lon >> 8;
-      message[14] = lon;
       LMIC_setTxData2(1, message, sizeof(message), 0);
     }
     //Serial.println(F("Sending: "));
